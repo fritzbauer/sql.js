@@ -23,3 +23,7 @@ jobs:
         BRANCH: gh-pages # The branch the action should deploy to.
         FOLDER: "." # The folder the action should deploy.
         CLEAN: false # Automatically remove deleted files from the deploy branch
+        submodules: true       # Initialize and update submodules
+        fetch-depth: 1         # Shallow clone for main repo
+        submodules-depth: 1 
+
