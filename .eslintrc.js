@@ -22,7 +22,8 @@ module.exports = {
         "/src/shell-post.js",
         "/src/shell-pre.js",
         "/test/",
-        "!/.eslintrc.js"
+        "!/.eslintrc.js",
+        "/fts5-snowball"
     ],
     parserOptions: {
         ecmaVersion: 5,

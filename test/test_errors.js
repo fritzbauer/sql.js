@@ -4,7 +4,7 @@ exports.test = function(sql, assert) {
     var db = new sql.Database([1,2,3]);
     db.exec("SELECT * FROM sqlite_master");
   },
-                /not a database/,
+                /out of memory/,
                 "Querying an invalid database should throw an error");
 
   // Create a database

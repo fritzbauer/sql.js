@@ -10,3 +10,5 @@ tmp/
 c/
 emsdk/
 sqljs.zip
+*.log
+dist/

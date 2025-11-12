@@ -55,6 +55,7 @@ Module["onRuntimeInitialized"] = function onRuntimeInitialized() {
     // register, used for temporary stack values
     var apiTemp = stackAlloc(4);
     var cwrap = Module["cwrap"];
+
     // Null pointer
     var NULL = 0;
     // SQLite enum
@@ -243,6 +244,12 @@ Module["onRuntimeInitialized"] = function onRuntimeInitialized() {
         "sqlite3_update_hook",
         "number",
         ["number", "number", "number"]
+    );
+
+    var auto_load_fts5_snowball_extension = cwrap(
+        "auto_load_fts5_snowball_extension",
+        "void",
+        ["number"]
     );
 
     /**
@@ -831,6 +838,7 @@ Module["onRuntimeInitialized"] = function onRuntimeInitialized() {
         if (data != null) {
             FS.createDataFile("/", this.filename, data, true, true);
         }
+        auto_load_fts5_snowball_extension(0);
         this.handleError(sqlite3_open(this.filename, apiTemp));
         this.db = getValue(apiTemp, "i32");
         registerExtensionFunctions(this.db);
