@@ -19,13 +19,13 @@ EMCC=emcc
 
 SQLITE_COMPILATION_FLAGS = \
 	-Oz \
-	-DSQLITE_OMIT_LOAD_EXTENSION \
 	-DSQLITE_DISABLE_LFS \
 	-DSQLITE_ENABLE_FTS3 \
 	-DSQLITE_ENABLE_FTS5 \
 	-DSQLITE_ENABLE_FTS3_PARENTHESIS \
 	-DSQLITE_THREADSAFE=0 \
-	-DSQLITE_ENABLE_NORMALIZE
+	-DSQLITE_ENABLE_NORMALIZE \
+	-DSQLITE_CORE
 
 # When compiling to WASM, enabling memory-growth is not expected to make much of an impact, so we enable it for all builds
 # Since tihs is a library and not a standalone executable, we don't want to catch unhandled Node process exceptions
@@ -60,7 +60,15 @@ EMFLAGS_DEBUG = \
 	-s ASSERTIONS=2 \
 	-O1
 
-BITCODE_FILES = out/sqlite3.o out/extension-functions.o
+BITCODE_FILES = out/sqlite3.o out/extension-functions.o out/fts5stemmer.o out/snowball_api.o out/snowball_utilities.o out/snowball_libstemmer.o out/auto_load_fts5.o $(SNOWBALL_ALGO_OBJS)
+
+# fts5-snowball
+FTS5_STEMMER_SRC = fts5-snowball/src/fts5stemmer.c
+SNOWBALL_API_SRC = fts5-snowball/snowball/runtime/api.c
+SNOWBALL_UTILITIES_SRC = fts5-snowball/snowball/runtime/utilities.c
+SNOWBALL_LIBSTEMMER_SRC = fts5-snowball/snowball/libstemmer/libstemmer.c
+SNOWBALL_ALGO_SRCS = $(wildcard fts5-snowball/snowball/src_c/*.c)
+SNOWBALL_ALGO_OBJS = $(patsubst fts5-snowball/snowball/src_c/%.c,out/%.o,$(SNOWBALL_ALGO_SRCS))
 
 OUTPUT_WRAPPER_FILES = src/shell-pre.js src/shell-post.js
 
@@ -153,6 +161,30 @@ out/extension-functions.o: sqlite-src/$(SQLITE_AMALGAMATION)
 	mkdir -p out
 	# Generate llvm bitcode
 	$(EMCC) $(SQLITE_COMPILATION_FLAGS) -c sqlite-src/$(SQLITE_AMALGAMATION)/extension-functions.c -o $@
+
+out/fts5stemmer.o: $(FTS5_STEMMER_SRC)
+	mkdir -p out
+	$(EMCC) $(SQLITE_COMPILATION_FLAGS) -Ifts5-snowball/snowball/include -Isqlite-src/$(SQLITE_AMALGAMATION) -c $(FTS5_STEMMER_SRC) -o $@
+
+out/snowball_api.o: $(SNOWBALL_API_SRC)
+	mkdir -p out
+	$(EMCC) $(SQLITE_COMPILATION_FLAGS) -Ifts5-snowball/snowball/include -c $< -o $@
+
+out/snowball_utilities.o: $(SNOWBALL_UTILITIES_SRC)
+	mkdir -p out
+	$(EMCC) $(SQLITE_COMPILATION_FLAGS) -Ifts5-snowball/snowball/include -c $< -o $@
+
+out/snowball_libstemmer.o: $(SNOWBALL_LIBSTEMMER_SRC)
+	mkdir -p out
+	$(EMCC) $(SQLITE_COMPILATION_FLAGS) -Ifts5-snowball/snowball/include -c $< -o $@
+
+$(SNOWBALL_ALGO_OBJS): out/%.o: fts5-snowball/snowball/src_c/%.c
+	mkdir -p out
+	$(EMCC) $(SQLITE_COMPILATION_FLAGS) -Ifts5-snowball/snowball/include -Ifts5-snowball/snowball/runtime -c $< -o $@
+
+out/auto_load_fts5.o: src/auto_load_fts5.c
+	mkdir -p out
+	$(EMCC) $(SQLITE_COMPILATION_FLAGS) -Isqlite-src/$(SQLITE_AMALGAMATION) -c src/auto_load_fts5.c -o $@
 
 # TODO: This target appears to be unused. If we re-instatate it, we'll need to add more files inside of the JS folder
 # module.tar.gz: test package.json AUTHORS README.md dist/sql-asm.js
