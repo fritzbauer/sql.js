@@ -8,7 +8,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:  
-        submodules: true       # Initialize and update submodules
+        submodules: recursive       # Initialize and update submodules
         fetch-depth: 1         # Shallow clone for main repo
         submodules-depth: 1 
     - name: make
