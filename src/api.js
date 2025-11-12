@@ -246,8 +246,11 @@ Module["onRuntimeInitialized"] = function onRuntimeInitialized() {
         ["number", "number", "number"]
     );
 
-    var auto_load_fts5_snowball_extension = 
-        cwrap("auto_load_fts5_snowball_extension", "void", ["number"]);
+    var auto_load_fts5_snowball_extension = cwrap(
+        "auto_load_fts5_snowball_extension",
+        "void",
+        ["number"]
+    );
 
     /**
     * @classdesc
