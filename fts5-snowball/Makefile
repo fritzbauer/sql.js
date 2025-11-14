@@ -1,7 +1,7 @@
 SQLITE_FLAGS=`pkg-config --cflags --silence-errors sqlite3`
 
 all: libstemmer fts5stemmer.o
-	cc -fPIC -shared -o fts5stemmer.so fts5stemmer.o snowball/libstemmer.o
+	cc -fPIC -shared -o fts5stemmer.so fts5stemmer.o snowball/libstemmer/libstemmer.o
 	@[ "`uname -s`" = "Darwin" ] && mv fts5stemmer.so fts5stemmer.dylib || :
 
 libstemmer:
