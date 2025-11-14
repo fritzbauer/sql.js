@@ -4,6 +4,7 @@ set -e
 
 cd /github/workspace/
 cd fts5-snowball
-make clean all
+make clean || true
+make all
 cd ..
 npm run rebuild
